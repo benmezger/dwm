@@ -395,18 +395,23 @@ static const char *layoutmenu_cmd = "layoutmenu.sh";
 
 #if COOL_AUTOSTART_PATCH
 static const char *const autostart[] = {
-	"st", NULL,
-	NULL /* terminate */
+	"alacritty", NULL,
+	"google-chrome-stable", NULL,
+    NULL, /* terminate */
 };
 #endif // COOL_AUTOSTART_PATCH
 
 #if RENAMED_SCRATCHPADS_PATCH
 static const char *scratchpadcmd[] = {"s", "st", "-n", "spterm", NULL};
 #elif SCRATCHPADS_PATCH
-const char *spcmd1[] = {"st", "-n", "spterm", "-g", "120x34", NULL };
+const char *spcmd1[] = {"alacritty", "--class", "scratch0", NULL};
+const char *spcmd2[] = {"alacritty", "--class", "scratch1", NULL};
+const char *spcmd3[] = {"/home/seds/.bin/editor", NULL};
 static Sp scratchpads[] = {
-   /* name          cmd  */
-   {"spterm",      spcmd1},
+	/* name          cmd  */
+	{"scratch0",    spcmd1},
+	{"scratch1",    spcmd2},
+	{"emacs0",      spcmd3},
 };
 #endif // SCRATCHPADS_PATCH
 
@@ -493,10 +498,17 @@ static const Rule rules[] = {
 	RULE(.wintype = WTYPE "SPLASH", .isfloating = 1)
 	RULE(.class = "Gimp", .tags = 1 << 4)
 	RULE(.class = "Firefox", .tags = 1 << 7)
+    RULE(.class = "Blueman-manager", .isfloating = 1, .monitor = -1)
+    RULE(.class = "Nm-connection-editor", .isfloating = 1, .monitor = -1)
+    RULE(.class = "Pavucontrol", .isfloating = 1, .monitor = -1)
+    RULE(.class = "Pcmanfm", .isfloating = 1, .monitor = -1)
+    RULE(.class = "Thunar", .isfloating = 1, .monitor = -1)
 	#if RENAMED_SCRATCHPADS_PATCH
 	RULE(.instance = "spterm", .scratchkey = 's', .isfloating = 1)
 	#elif SCRATCHPADS_PATCH
-	RULE(.instance = "spterm", .tags = SPTAG(0), .isfloating = 1)
+	RULE(.instance = "scratch0", .tags = SPTAG(0), .isfloating = 1, .monitor = -1)
+	RULE(.instance = "scratch1", .tags = SPTAG(1), .isfloating = 1, .monitor = -1)
+	RULE(.instance = "emacs0", .tags = SPTAG(2), .isfloating = 1, .monitor = -1)
 	#endif // SCRATCHPADS_PATCH
 };
 
@@ -763,7 +775,8 @@ static const char *xkb_layouts[]  = {
 #endif // XKB_PATCH
 
 /* key definitions */
-#define MODKEY Mod1Mask
+#define MODKEY Mod4Mask
+#define MODKEY1 Mod1Mask
 #if COMBO_PATCH && SWAPTAGS_PATCH && TAGOTHERMONITOR_PATCH
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      comboview,      {.ui = 1 << TAG} }, \
@@ -842,7 +855,7 @@ static const char *xkb_layouts[]  = {
 #endif // BAR_HOLDBAR_PATCH
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
-#define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
+#define SHCMD(cmd) { .v = (const char*[]){ "/usr/bin/zsh", "-c", cmd, NULL } }
 
 /* commands */
 #if !NODMENU_PATCH
@@ -863,7 +876,7 @@ static const char *dmenucmd[] = {
 	#endif // BAR_DMENUMATCHTOP_PATCH
 	NULL
 };
-static const char *termcmd[]  = { "st", NULL };
+static const char *termcmd[]  = { "alacritty", NULL };
 
 #if BAR_STATUSCMD_PATCH
 #if BAR_DWMBLOCKS_PATCH
@@ -894,14 +907,15 @@ static const Key keys[] = {
 	#if KEYMODES_PATCH
 	{ MODKEY,                       XK_Escape,     setkeymode,             {.ui = COMMANDMODE} },
 	#endif // KEYMODES_PATCH
-	{ MODKEY,                       XK_p,          spawn,                  {.v = dmenucmd } },
-	{ MODKEY|ShiftMask,             XK_Return,     spawn,                  {.v = termcmd } },
+	{ MODKEY|MODKEY1,               XK_p,          spawn,                  {.v = dmenucmd } },
+	{ MODKEY,                       XK_Return,     spawn,                  {.v = termcmd } },
 	#if RIODRAW_PATCH
 	{ MODKEY|ControlMask,           XK_p,          riospawnsync,           {.v = dmenucmd } },
 	{ MODKEY|ControlMask,           XK_Return,     riospawn,               {.v = termcmd } },
 	{ MODKEY,                       XK_s,          rioresize,              {0} },
 	#endif // RIODRAW_PATCH
 	{ MODKEY,                       XK_b,          togglebar,              {0} },
+	{ MODKEY|MODKEY1,               XK_b,          togglebar,              {0} },
 	#if TAB_PATCH
 	{ MODKEY|ControlMask,           XK_b,          tabmode,                {-1} },
 	#endif // TAB_PATCH
@@ -912,8 +926,8 @@ static const Key keys[] = {
 	STACKKEYS(MODKEY,                              focus)
 	STACKKEYS(MODKEY|ShiftMask,                    push)
 	#else
-	{ MODKEY,                       XK_j,          focusstack,             {.i = +1 } },
-	{ MODKEY,                       XK_k,          focusstack,             {.i = -1 } },
+	{ MODKEY|MODKEY1,               XK_j,          focusstack,              {.i = +1 } },
+	{ MODKEY|MODKEY1,               XK_k,          focusstack,              {.i = -1 } },
 	#endif // STACKER_PATCH
 	#if FOCUSDIR_PATCH
 	{ MODKEY,                       XK_Left,       focusdir,               {.i = 0 } }, // left
@@ -941,14 +955,14 @@ static const Key keys[] = {
 	{ MODKEY|ControlMask,           XK_j,          pushdown,               {0} },
 	{ MODKEY|ControlMask,           XK_k,          pushup,                 {0} },
 	#endif // PUSH_PATCH / PUSH_NO_MASTER_PATCH
-	{ MODKEY,                       XK_i,          incnmaster,             {.i = +1 } },
-	{ MODKEY,                       XK_d,          incnmaster,             {.i = -1 } },
+	{ MODKEY|MODKEY1,               XK_i,          incnmaster,             {.i = +1 } },
+	{ MODKEY|MODKEY1,               XK_d,          incnmaster,             {.i = -1 } },
 	#if FLEXTILE_DELUXE_LAYOUT
 	{ MODKEY|ControlMask,           XK_i,          incnstack,              {.i = +1 } },
 	{ MODKEY|ControlMask,           XK_u,          incnstack,              {.i = -1 } },
 	#endif // FLEXTILE_DELUXE_LAYOUT
-	{ MODKEY,                       XK_h,          setmfact,               {.f = -0.05} },
-	{ MODKEY,                       XK_l,          setmfact,               {.f = +0.05} },
+	{ MODKEY|MODKEY1,               XK_h,           setmfact,              {.f = -0.05} },
+	{ MODKEY|MODKEY1,               XK_l,           setmfact,              {.f = +0.05} },
 	#if CFACTS_PATCH
 	{ MODKEY|ShiftMask,             XK_h,          setcfact,               {.f = +0.25} },
 	{ MODKEY|ShiftMask,             XK_l,          setcfact,               {.f = -0.25} },
@@ -987,24 +1001,25 @@ static const Key keys[] = {
 	#if INSETS_PATCH
 	{ MODKEY|ShiftMask|ControlMask, XK_a,          updateinset,            {.v = &default_inset } },
 	#endif // INSETS_PATCH
-	{ MODKEY,                       XK_Return,     zoom,                   {0} },
+	{ MODKEY|ShiftMask,             XK_Return,     zoom,                   {0} },
 	#if VANITYGAPS_PATCH
-	{ MODKEY|Mod4Mask,              XK_u,          incrgaps,               {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_u,          incrgaps,               {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_i,          incrigaps,              {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_i,          incrigaps,              {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_o,          incrogaps,              {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_o,          incrogaps,              {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_6,          incrihgaps,             {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_6,          incrihgaps,             {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_7,          incrivgaps,             {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_7,          incrivgaps,             {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_8,          incrohgaps,             {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_8,          incrohgaps,             {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_9,          incrovgaps,             {.i = +1 } },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_9,          incrovgaps,             {.i = -1 } },
-	{ MODKEY|Mod4Mask,              XK_0,          togglegaps,             {0} },
-	{ MODKEY|Mod4Mask|ShiftMask,    XK_0,          defaultgaps,            {0} },
+	{ MODKEY|MODKEY1,               XK_minus,          incrgaps,               {.i = +1 } },
+	{ MODKEY|MODKEY1,               XK_equal,          incrgaps,               {.i = -1 } },
+	{ MODKEY|ShiftMask,             XK_minus,          defaultgaps,            {0} },
+	{ MODKEY|ShiftMask,             XK_equal,          togglegaps,             {0} },
+	// { MODKEY|Mod4Mask,              XK_i,          incrigaps,              {.i = +1 } },
+	// { MODKEY|Mod4Mask|ShiftMask,    XK_i,          incrigaps,              {.i = -1 } },
+	// { MODKEY|Mod4Mask,              XK_o,          incrogaps,              {.i = +1 } },
+	// { MODKEY|Mod4Mask|ShiftMask,    XK_o,          incrogaps,              {.i = -1 } },
+	// { MODKEY|Mod4Mask,              XK_6,          incrihgaps,             {.i = +1 } },
+	// { MODKEY|Mod4Mask|ShiftMask,    XK_6,          incrihgaps,             {.i = -1 } },
+	// { MODKEY|Mod4Mask,              XK_7,          incrivgaps,             {.i = +1 } },
+	// { MODKEY|Mod4Mask|ShiftMask,    XK_7,          incrivgaps,             {.i = -1 } },
+	// { MODKEY|Mod4Mask,              XK_8,          incrohgaps,             {.i = +1 } },
+	// { MODKEY|Mod4Mask|ShiftMask,    XK_8,          incrohgaps,             {.i = -1 } },
+	// { MODKEY|Mod4Mask,              XK_9,          incrovgaps,             {.i = +1 } },
+	// { MODKEY|Mod4Mask|ShiftMask,    XK_9,          incrovgaps,             {.i = -1 } },
+	// { MODKEY|Mod4Mask,              XK_0,          togglegaps,             {0} },
 	#endif // VANITYGAPS_PATCH
 	#if ALT_TAB_PATCH
 	{ Mod1Mask,                     XK_Tab,        alttabstart,            {0} },
@@ -1038,14 +1053,14 @@ static const Key keys[] = {
 	#if BAR_WINTITLEACTIONS_PATCH
 	{ MODKEY|ControlMask,           XK_z,          showhideclient,         {0} },
 	#endif // BAR_WINTITLEACTIONS_PATCH
-	{ MODKEY|ShiftMask,             XK_c,          killclient,             {0} },
+	{ MODKEY|MODKEY1,               XK_c,          killclient,             {0} },
 	#if KILLUNSEL_PATCH
 	{ MODKEY|ShiftMask,             XK_x,          killunsel,              {0} },
 	#endif // KILLUNSEL_PATCH
 	#if SELFRESTART_PATCH
 	{ MODKEY|ShiftMask,             XK_r,          self_restart,           {0} },
 	#endif // SELFRESTART_PATCH
-	{ MODKEY|ShiftMask,             XK_q,          quit,                   {0} },
+	{ MODKEY|ControlMask|ShiftMask, XK_q,          quit,                   {0} },
 	#if RESTARTSIG_PATCH
 	{ MODKEY|ControlMask|ShiftMask, XK_q,          quit,                   {1} },
 	#endif // RESTARTSIG_PATCH
@@ -1095,9 +1110,9 @@ static const Key keys[] = {
 	{ MODKEY|ControlMask,           XK_grave,      setscratch,             {.v = scratchpadcmd } },
 	{ MODKEY|ShiftMask,             XK_grave,      removescratch,          {.v = scratchpadcmd } },
 	#elif SCRATCHPADS_PATCH
-	{ MODKEY,                       XK_grave,      togglescratch,          {.ui = 0 } },
-	{ MODKEY|ControlMask,           XK_grave,      setscratch,             {.ui = 0 } },
-	{ MODKEY|ShiftMask,             XK_grave,      removescratch,          {.ui = 0 } },
+	{ MODKEY|MODKEY1,               XK_0,          togglescratch,          {.ui = 2 } },
+	{ MODKEY|ControlMask,           XK_minus,      togglescratch,          {.ui = 0 } },
+	{ MODKEY|ControlMask,           XK_equal,      togglescratch,          {.ui = 1 } },
 	#endif // SCRATCHPADS_PATCH | RENAMED_SCRATCHPADS_PATCH
 	#if UNFLOATVISIBLE_PATCH
 	{ MODKEY|Mod4Mask,              XK_space,      unfloatvisible,         {0} },
@@ -1114,20 +1129,21 @@ static const Key keys[] = {
 	#endif // FULLSCREEN_PATCH
 	#if STICKY_PATCH
 	{ MODKEY|ShiftMask,             XK_s,          togglesticky,           {0} },
+	{ MODKEY|MODKEY1,               XK_s,          togglesticky,           {0} },
 	#endif // STICKY_PATCH
 	#if SCRATCHPAD_ALT_1_PATCH
 	{ MODKEY,                       XK_minus,      scratchpad_show,        {0} },
 	{ MODKEY|ShiftMask,             XK_minus,      scratchpad_hide,        {0} },
 	{ MODKEY,                       XK_equal,      scratchpad_remove,      {0} },
 	#elif SCRATCHPADS_PATCH && !RENAMED_SCRATCHPADS_PATCH
-	{ MODKEY,                       XK_0,          view,                   {.ui = ~SPTAGMASK } },
-	{ MODKEY|ShiftMask,             XK_0,          tag,                    {.ui = ~SPTAGMASK } },
+	{ MODKEY|MODKEY1,                       XK_0,          view,                   {.ui = ~SPTAGMASK } },
+	{ MODKEY|MODKEY1|ShiftMask,             XK_0,          tag,                    {.ui = ~SPTAGMASK } },
 	#else
 	{ MODKEY,                       XK_0,          view,                   {.ui = ~0 } },
 	{ MODKEY|ShiftMask,             XK_0,          tag,                    {.ui = ~0 } },
 	#endif // SCRATCHPAD_ALT_1_PATCH
-	{ MODKEY,                       XK_comma,      focusmon,               {.i = -1 } },
-	{ MODKEY,                       XK_period,     focusmon,               {.i = +1 } },
+	{ MODKEY|MODKEY1,               XK_comma,      focusmon,               {.i = -1 } },
+	{ MODKEY|MODKEY1,               XK_period,     focusmon,               {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_comma,      tagmon,                 {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_period,     tagmon,                 {.i = +1 } },
 	#if FOCUSADJACENTTAG_PATCH
@@ -1596,166 +1612,166 @@ static IPCCommand ipccommands[] = {
 	IPCCOMMAND( toggletag, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( toggleview, 1, {ARG_TYPE_UINT} ),
 	IPCCOMMAND( view, 1, {ARG_TYPE_UINT} ),
-	IPCCOMMAND( zoom, 1, {ARG_TYPE_NONE} ),
-	#if BAR_ALTERNATIVE_TAGS_PATCH
-	IPCCOMMAND( togglealttag, 1, {ARG_TYPE_NONE} ),
-	#endif // BAR_ALTERNATIVE_TAGS_PATCH
-	#if BAR_TAGGRID_PATCH
-	IPCCOMMAND( switchtag, 1, {ARG_TYPE_UINT} ),
-	#endif // BAR_TAGGRID_PATCH
-	#if CFACTS_PATCH
-	IPCCOMMAND( setcfact, 1, {ARG_TYPE_FLOAT} ),
-	#endif // CFACTS_PATCH
-	#if CYCLELAYOUTS_PATCH
-	IPCCOMMAND( cyclelayout, 1, {ARG_TYPE_SINT} ),
-	#endif // CYCLELAYOUTS_PATCH
-	#if EXRESIZE_PATCH
-	IPCCOMMAND( explace, 1, {ARG_TYPE_UINT} ),
-	IPCCOMMAND( togglehorizontalexpand, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( toggleverticalexpand, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( togglemaximize, 1, {ARG_TYPE_SINT} ),
-	#endif // EXRESIZE_PATCH
-	#if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
-	IPCCOMMAND( togglefakefullscreen, 1, {ARG_TYPE_NONE} ),
-	#endif // FAKEFULLSCREEN_CLIENT_PATCH
-	#if FLOATPOS_PATCH
-	IPCCOMMAND( floatpos, 1, {ARG_TYPE_STR} ),
-	#endif // FLOATPOS_PATCH
-	#if FULLSCREEN_PATCH
-	IPCCOMMAND( fullscreen, 1, {ARG_TYPE_NONE} ),
-	#endif // FULLSCREEN_PATCH
-	#if FLEXTILE_DELUXE_LAYOUT
-	IPCCOMMAND( incnstack, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( rotatelayoutaxis, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( setlayoutaxisex, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( mirrorlayout, 1, {ARG_TYPE_NONE} ),
-	#endif // FLEXTILE_DELUXE_LAYOUT
-	#if FOCUSURGENT_PATCH
-	IPCCOMMAND( focusurgent, 1, {ARG_TYPE_NONE} ),
-	#endif // FOCUSURGENT_PATCH
-	#if FOCUSADJACENTTAG_PATCH
-	IPCCOMMAND( viewtoleft, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( viewtoright, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( tagtoleft, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( tagtoright, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( tagandviewtoleft, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( tagandviewtoright, 1, {ARG_TYPE_NONE} ),
-	#endif // FOCUSADJACENTTAG_PATCH
-	#if INPLACEROTATE_PATCH
-	IPCCOMMAND( inplacerotate, 1, {ARG_TYPE_SINT} ),
-	#endif // INPLACEROTATE_PATCH
-	#if KEYMODES_PATCH
-	IPCCOMMAND( setkeymode, 1, {ARG_TYPE_UINT} ),
-	#endif // KEYMODES_PATCH
-	#if MAXIMIZE_PATCH
-	IPCCOMMAND( togglehorizontalmax, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( toggleverticalmax, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( togglemax, 1, {ARG_TYPE_NONE} ),
-	#endif // MAXIMIZE_PATCH
-	#if MPDCONTROL_PATCH
-	IPCCOMMAND( mpdchange, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( mpdcontrol, 1, {ARG_TYPE_NONE} ),
-	#endif // MPDCONTROL_PATCH
-	#if MOVEPLACE_PATCH
-	IPCCOMMAND( moveplace, 1, {ARG_TYPE_UINT} ),
-	#endif // MOVEPLACE_PATCH
-	#if MOVERESIZE_PATCH
-	IPCCOMMAND( moveresize, 1, {ARG_TYPE_STR} ),
-	#endif // MOVERESIZE_PATCH
-	#if NAMETAG_PATCH
-	IPCCOMMAND( nametag, 1, {ARG_TYPE_NONE} ),
-	#endif // NAMETAG_PATCH
-	#if RIODRAW_PATCH
-	IPCCOMMAND( rioresize, 1, {ARG_TYPE_NONE} ),
-	#endif // RIODRAW_PATCH
-	#if PUSH_PATCH || PUSH_NO_MASTER_PATCH
-	IPCCOMMAND( pushdown, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( pushup, 1, {ARG_TYPE_NONE} ),
-	#endif // PUSH_PATCH / PUSH_NO_MASTER_PATCH
-	#if ROTATESTACK_PATCH
-	IPCCOMMAND( rotatestack, 1, {ARG_TYPE_SINT} ),
-	#endif // ROTATESTACK_PATCH
-	#if SCRATCHPADS_PATCH && !RENAMED_SCRATCHPADS_PATCH
-	IPCCOMMAND( togglescratch, 1, {ARG_TYPE_UINT} ),
-	#endif // SCRATCHPADS_PATCH
-	#if SELFRESTART_PATCH
-	IPCCOMMAND( self_restart, 1, {ARG_TYPE_NONE} ),
-	#endif // SELFRESTART_PATCH
-	#if SETBORDERPX_PATCH
-	IPCCOMMAND( setborderpx, 1, {ARG_TYPE_SINT} ),
-	#endif // SETBORDERPX_PATCH
-	#if BAR_WINTITLEACTIONS_PATCH
-	IPCCOMMAND( showhideclient, 1, {ARG_TYPE_NONE} ),
-	#endif // BAR_WINTITLEACTIONS_PATCH
-	#if SHIFTBOTH_PATCH
-	IPCCOMMAND( shiftboth, 1, {ARG_TYPE_SINT} ),
-	#endif // SHIFTBOTH_PATCH
-	#if SHIFTTAG_PATCH
-	IPCCOMMAND( shifttag, 1, {ARG_TYPE_SINT} ),
-	#endif // SHIFTTAG_PATCH
-	#if SHIFTTAGCLIENTS_PATCH
-	IPCCOMMAND( shifttagclients, 1, {ARG_TYPE_SINT} ),
-	#endif // SHIFTVIEWCLIENTS_PATCH
-	#if SHIFTVIEW_PATCH
-	IPCCOMMAND( shiftview, 1, {ARG_TYPE_SINT} ),
-	#endif // SHIFTVIEW_PATCH
-	#if SHIFTVIEW_CLIENTS_PATCH
-	IPCCOMMAND( shiftviewclients, 1, {ARG_TYPE_SINT} ),
-	#endif // SHIFTVIEW_CLIENTS_PATCH
-	#if SHIFTSWAPTAGS_PATCH && SWAPTAGS_PATCH
-	IPCCOMMAND( shiftswaptags, 1, {ARG_TYPE_SINT} ),
-	#endif // SHIFTSWAPTAGS_PATCH
-	#if STACKER_PATCH
-	IPCCOMMAND( pushstack, 1, {ARG_TYPE_SINT} ),
-	#endif // STACKER_PATCH
-	#if STICKY_PATCH
-	IPCCOMMAND( togglesticky, 1, {ARG_TYPE_NONE} ),
-	#endif // STICKY_PATCH
-	#if SWAPFOCUS_PATCH && PERTAG_PATCH
-	IPCCOMMAND( swapfocus, 1, {ARG_TYPE_SINT} ),
-	#endif // SWAPFOCUS_PATCH
-	#if SWITCHCOL_PATCH
-	IPCCOMMAND( switchcol, 1, {ARG_TYPE_NONE} ),
-	#endif // SWITCHCOL_PATCH
-	#if TAGALLMON_PATCH
-	IPCCOMMAND( tagallmon, 1, {ARG_TYPE_SINT} ),
-	#endif // TAGALLMON_PATCH
-	#if TAGOTHERMONITOR_PATCH
-	IPCCOMMAND( tagnextmonex, 1, {ARG_TYPE_UINT} ),
-	IPCCOMMAND( tagprevmonex, 1, {ARG_TYPE_UINT} ),
-	#endif // TAGOTHERMONITOR_PATCH
-	#if TAGSWAPMON_PATCH
-	IPCCOMMAND( tagswapmon, 1, {ARG_TYPE_SINT} ),
-	#endif // TAGSWAPMON_PATCH
-	#if TOGGLEFULLSCREEN_PATCH
-	IPCCOMMAND( togglefullscreen, 1, {ARG_TYPE_NONE} ),
-	#endif // TOGGLEFULLSCREEN_PATCH
-	#if TRANSFER_PATCH
-	IPCCOMMAND( transfer, 1, {ARG_TYPE_NONE} ),
-	#endif // TRANSFER_PATCH
-	#if TRANSFER_ALL_PATCH
-	IPCCOMMAND( transferall, 1, {ARG_TYPE_NONE} ),
-	#endif // TRANSFER_ALL_PATCH
-	#if UNFLOATVISIBLE_PATCH
-	IPCCOMMAND( unfloatvisible, 1, {ARG_TYPE_NONE} ),
-	#endif // UNFLOATVISIBLE_PATCH
-	#if VANITYGAPS_PATCH
-	IPCCOMMAND( incrgaps, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( incrigaps, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( incrogaps, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( incrihgaps, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( incrivgaps, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( incrohgaps, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( incrovgaps, 1, {ARG_TYPE_SINT} ),
-	IPCCOMMAND( togglegaps, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( defaultgaps, 1, {ARG_TYPE_NONE} ),
-	IPCCOMMAND( setgapsex, 1, {ARG_TYPE_SINT} ),
-	#endif // VANITYGAPS_PATCH
-	#if WINVIEW_PATCH
-	IPCCOMMAND( winview, 1, {ARG_TYPE_NONE} ),
-	#endif // WINVIEW_PATCH
-	#if XRDB_PATCH && !BAR_VTCOLORS_PATCH
-	IPCCOMMAND( xrdb, 1, {ARG_TYPE_NONE} ),
-	#endif // XRDB_PATCH
+	IPCCOMMAND( zoom, 1, {ARG_TYPE_NONE }),
+#if BAR_ALTERNATIVE_TAGS_PATCH
+	IPCCOMMAND(togglealttag, 1, { ARG_TYPE_NONE }),
+#endif // BAR_ALTERNATIVE_TAGS_PATCH
+#if BAR_TAGGRID_PATCH
+	IPCCOMMAND(switchtag, 1, { ARG_TYPE_UINT }),
+#endif // BAR_TAGGRID_PATCH
+#if CFACTS_PATCH
+	IPCCOMMAND(setcfact, 1, { ARG_TYPE_FLOAT }),
+#endif // CFACTS_PATCH
+#if CYCLELAYOUTS_PATCH
+	IPCCOMMAND(cyclelayout, 1, { ARG_TYPE_SINT }),
+#endif // CYCLELAYOUTS_PATCH
+#if EXRESIZE_PATCH
+	IPCCOMMAND(explace, 1, { ARG_TYPE_UINT }),
+	IPCCOMMAND(togglehorizontalexpand, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(toggleverticalexpand, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(togglemaximize, 1, { ARG_TYPE_SINT }),
+#endif // EXRESIZE_PATCH
+#if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
+	IPCCOMMAND(togglefakefullscreen, 1, { ARG_TYPE_NONE }),
+#endif // FAKEFULLSCREEN_CLIENT_PATCH
+#if FLOATPOS_PATCH
+	IPCCOMMAND(floatpos, 1, { ARG_TYPE_STR }),
+#endif // FLOATPOS_PATCH
+#if FULLSCREEN_PATCH
+	IPCCOMMAND(fullscreen, 1, { ARG_TYPE_NONE }),
+#endif // FULLSCREEN_PATCH
+#if FLEXTILE_DELUXE_LAYOUT
+	IPCCOMMAND(incnstack, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(rotatelayoutaxis, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(setlayoutaxisex, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(mirrorlayout, 1, { ARG_TYPE_NONE }),
+#endif // FLEXTILE_DELUXE_LAYOUT
+#if FOCUSURGENT_PATCH
+	IPCCOMMAND(focusurgent, 1, { ARG_TYPE_NONE }),
+#endif // FOCUSURGENT_PATCH
+#if FOCUSADJACENTTAG_PATCH
+	IPCCOMMAND(viewtoleft, 1, { ARG_TYPE_NONE }),
+	IPCCOMMAND(viewtoright, 1, { ARG_TYPE_NONE }),
+	IPCCOMMAND(tagtoleft, 1, { ARG_TYPE_NONE }),
+	IPCCOMMAND(tagtoright, 1, { ARG_TYPE_NONE }),
+	IPCCOMMAND(tagandviewtoleft, 1, { ARG_TYPE_NONE }),
+	IPCCOMMAND(tagandviewtoright, 1, { ARG_TYPE_NONE }),
+#endif // FOCUSADJACENTTAG_PATCH
+#if INPLACEROTATE_PATCH
+	IPCCOMMAND(inplacerotate, 1, { ARG_TYPE_SINT }),
+#endif // INPLACEROTATE_PATCH
+#if KEYMODES_PATCH
+	IPCCOMMAND(setkeymode, 1, { ARG_TYPE_UINT }),
+#endif // KEYMODES_PATCH
+#if MAXIMIZE_PATCH
+	IPCCOMMAND(togglehorizontalmax, 1, { ARG_TYPE_NONE }),
+	IPCCOMMAND(toggleverticalmax, 1, { ARG_TYPE_NONE }),
+	IPCCOMMAND(togglemax, 1, { ARG_TYPE_NONE }),
+#endif // MAXIMIZE_PATCH
+#if MPDCONTROL_PATCH
+	IPCCOMMAND(mpdchange, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(mpdcontrol, 1, { ARG_TYPE_NONE }),
+#endif // MPDCONTROL_PATCH
+#if MOVEPLACE_PATCH
+	IPCCOMMAND(moveplace, 1, { ARG_TYPE_UINT }),
+#endif // MOVEPLACE_PATCH
+#if MOVERESIZE_PATCH
+	IPCCOMMAND(moveresize, 1, { ARG_TYPE_STR }),
+#endif // MOVERESIZE_PATCH
+#if NAMETAG_PATCH
+	IPCCOMMAND(nametag, 1, { ARG_TYPE_NONE }),
+#endif // NAMETAG_PATCH
+#if RIODRAW_PATCH
+	IPCCOMMAND(rioresize, 1, { ARG_TYPE_NONE }),
+#endif // RIODRAW_PATCH
+#if PUSH_PATCH || PUSH_NO_MASTER_PATCH
+	IPCCOMMAND(pushdown, 1, { ARG_TYPE_NONE }),
+	IPCCOMMAND(pushup, 1, { ARG_TYPE_NONE }),
+#endif // PUSH_PATCH / PUSH_NO_MASTER_PATCH
+#if ROTATESTACK_PATCH
+	IPCCOMMAND(rotatestack, 1, { ARG_TYPE_SINT }),
+#endif // ROTATESTACK_PATCH
+#if SCRATCHPADS_PATCH && !RENAMED_SCRATCHPADS_PATCH
+	IPCCOMMAND(togglescratch, 1, { ARG_TYPE_UINT }),
+#endif // SCRATCHPADS_PATCH
+#if SELFRESTART_PATCH
+	IPCCOMMAND(self_restart, 1, { ARG_TYPE_NONE }),
+#endif // SELFRESTART_PATCH
+#if SETBORDERPX_PATCH
+	IPCCOMMAND(setborderpx, 1, { ARG_TYPE_SINT }),
+#endif // SETBORDERPX_PATCH
+#if BAR_WINTITLEACTIONS_PATCH
+	IPCCOMMAND(showhideclient, 1, { ARG_TYPE_NONE }),
+#endif // BAR_WINTITLEACTIONS_PATCH
+#if SHIFTBOTH_PATCH
+	IPCCOMMAND(shiftboth, 1, { ARG_TYPE_SINT }),
+#endif // SHIFTBOTH_PATCH
+#if SHIFTTAG_PATCH
+	IPCCOMMAND(shifttag, 1, { ARG_TYPE_SINT }),
+#endif // SHIFTTAG_PATCH
+#if SHIFTTAGCLIENTS_PATCH
+	IPCCOMMAND(shifttagclients, 1, { ARG_TYPE_SINT }),
+#endif // SHIFTVIEWCLIENTS_PATCH
+#if SHIFTVIEW_PATCH
+	IPCCOMMAND(shiftview, 1, { ARG_TYPE_SINT }),
+#endif // SHIFTVIEW_PATCH
+#if SHIFTVIEW_CLIENTS_PATCH
+	IPCCOMMAND(shiftviewclients, 1, { ARG_TYPE_SINT }),
+#endif // SHIFTVIEW_CLIENTS_PATCH
+#if SHIFTSWAPTAGS_PATCH && SWAPTAGS_PATCH
+	IPCCOMMAND(shiftswaptags, 1, { ARG_TYPE_SINT }),
+#endif // SHIFTSWAPTAGS_PATCH
+#if STACKER_PATCH
+	IPCCOMMAND(pushstack, 1, { ARG_TYPE_SINT }),
+#endif // STACKER_PATCH
+#if STICKY_PATCH
+	IPCCOMMAND(togglesticky, 1, { ARG_TYPE_NONE }),
+#endif // STICKY_PATCH
+#if SWAPFOCUS_PATCH && PERTAG_PATCH
+	IPCCOMMAND(swapfocus, 1, { ARG_TYPE_SINT }),
+#endif // SWAPFOCUS_PATCH
+#if SWITCHCOL_PATCH
+	IPCCOMMAND(switchcol, 1, { ARG_TYPE_NONE }),
+#endif // SWITCHCOL_PATCH
+#if TAGALLMON_PATCH
+	IPCCOMMAND(tagallmon, 1, { ARG_TYPE_SINT }),
+#endif // TAGALLMON_PATCH
+#if TAGOTHERMONITOR_PATCH
+	IPCCOMMAND(tagnextmonex, 1, { ARG_TYPE_UINT }),
+	IPCCOMMAND(tagprevmonex, 1, { ARG_TYPE_UINT }),
+#endif // TAGOTHERMONITOR_PATCH
+#if TAGSWAPMON_PATCH
+	IPCCOMMAND(tagswapmon, 1, { ARG_TYPE_SINT }),
+#endif // TAGSWAPMON_PATCH
+#if TOGGLEFULLSCREEN_PATCH
+	IPCCOMMAND(togglefullscreen, 1, { ARG_TYPE_NONE }),
+#endif // TOGGLEFULLSCREEN_PATCH
+#if TRANSFER_PATCH
+	IPCCOMMAND(transfer, 1, { ARG_TYPE_NONE }),
+#endif // TRANSFER_PATCH
+#if TRANSFER_ALL_PATCH
+	IPCCOMMAND(transferall, 1, { ARG_TYPE_NONE }),
+#endif // TRANSFER_ALL_PATCH
+#if UNFLOATVISIBLE_PATCH
+	IPCCOMMAND(unfloatvisible, 1, { ARG_TYPE_NONE }),
+#endif // UNFLOATVISIBLE_PATCH
+#if VANITYGAPS_PATCH
+	IPCCOMMAND(incrgaps, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(incrigaps, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(incrogaps, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(incrihgaps, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(incrivgaps, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(incrohgaps, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(incrovgaps, 1, { ARG_TYPE_SINT }),
+	IPCCOMMAND(togglegaps, 1, { ARG_TYPE_NONE }),
+	IPCCOMMAND(defaultgaps, 1, { ARG_TYPE_NONE }),
+	IPCCOMMAND(setgapsex, 1, { ARG_TYPE_SINT }),
+#endif // VANITYGAPS_PATCH
+#if WINVIEW_PATCH
+	IPCCOMMAND(winview, 1, { ARG_TYPE_NONE }),
+#endif // WINVIEW_PATCH
+#if XRDB_PATCH && !BAR_VTCOLORS_PATCH
+	IPCCOMMAND(xrdb, 1, { ARG_TYPE_NONE }),
+#endif // XRDB_PATCH
 };
 #endif // IPC_PATCH
