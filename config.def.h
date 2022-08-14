@@ -165,17 +165,17 @@ static char c000000[]                    = "#504945"; // placeholder value
 static char normfgcolor[]                = "#bdae93";
 static char normbgcolor[]                = "#282828";
 static char normbordercolor[]            = "#504945";
-static char normfloatcolor[]             = "#db8fd9";
+static char normfloatcolor[]             = "#504945";
 
 static char selfgcolor[]                 = "#bdae93";
 static char selbgcolor[]                 = "#282828";
 static char selbordercolor[]             = "#504945";
-static char selfloatcolor[]              = "#db8fd9";
+static char selfloatcolor[]              = "#504945";
 
 static char titlenormfgcolor[]           = "#bdae93";
 static char titlenormbgcolor[]           = "#282828";
 static char titlenormbordercolor[]       = "#504945";
-static char titlenormfloatcolor[]        = "#db8fd9";
+static char titlenormfloatcolor[]        = "#504945";
 
 static char titleselfgcolor[]            = "#bdae93";
 static char titleselbgcolor[]            = "#282828";
