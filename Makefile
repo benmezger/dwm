@@ -9,7 +9,7 @@ OBJ = ${SRC:.c=.o}
 # FreeBSD users, prefix all ifdef, else and endif statements with a . for this to work (e.g. .ifdef)
 
 ifdef YAJLLIBS
-all: options dwm dwm-msg
+all: options clean dwm dwm-msg
 else
 all: options dwm
 endif
