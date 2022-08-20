@@ -52,6 +52,16 @@ dist: clean
 	gzip dwm-${VERSION}.tar
 	rm -rf dwm-${VERSION}
 
+
+finalizer:
+	# Only run this on expected output directory, and not from the dwm-flexipatch
+	# repository
+	rm -rf ../.dwm-git
+	cp -rf .git ../.dwm-git # backup git
+	./flexipatch-finalizer.sh -r -d ../dwm-flexipatch -o . --git
+	rm -rf .git # delete exported .git
+	cp -rf ../.dwm-git .git
+
 install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
 	cp -f dwm ${DESTDIR}${PREFIX}/bin
