@@ -58,6 +58,7 @@ finalizer:
 	# repository
 	rm -rf ../.dwm-git
 	cp -rf .git ../.dwm-git # backup git
+	make -C ../dwm-flexipatch
 	./flexipatch-finalizer.sh -r -d ../dwm-flexipatch -o .
 	rm -rf .git # delete exported .git
 	cp -rf ../.dwm-git .git
