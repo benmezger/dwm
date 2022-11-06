@@ -54,14 +54,17 @@ dist: clean
 
 
 finalizer:
-	# Only run this on expected output directory, and not from the dwm-flexipatch
-	# repository
-	rm -rf ../.dwm-git
-	cp -rf .git ../.dwm-git # backup git
-	make -C ../dwm-flexipatch
-	./flexipatch-finalizer.sh -r -d ../dwm-flexipatch -o .
-	rm -rf .git # delete exported .git
-	cp -rf ../.dwm-git .git
+	# should be run from the main flexipatch repository
+	set -e ;\
+	git_dir=$$(mktemp -dt git.XXX) ;\
+	final_dir=$$(mktemp -dt final.XXX) ;\
+	cp -rf .git $$final_dir ;\
+	rm -rf ./finalized ;\
+	make -C . ;\
+	./flexipatch-finalizer.sh -r -o $$final_dir ;\
+	cp -rf $$git_dir .git ;\
+	mkdir finalized ;\
+	cp -rf $$final_dir/* finalized
 
 install: all
 	mkdir -p ${DESTDIR}${PREFIX}/bin
