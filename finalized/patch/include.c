@@ -14,6 +14,7 @@
 #include "attachx.c"
 #include "cool_autostart.c"
 #include "cyclelayouts.c"
+#include "decorationhints.c"
 #include "focusmaster.c"
 #include "pertag.c"
 #include "scratchpad.c"
