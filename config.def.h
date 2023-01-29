@@ -395,7 +395,7 @@ static const char *layoutmenu_cmd = "layoutmenu.sh";
 
 #if COOL_AUTOSTART_PATCH
 static const char *const autostart[] = {
-	"alacritty", NULL,
+	"bash ~/.bin/terminal", NULL,
 	//"google-chrome-stable", NULL,
     NULL, /* terminate */
 };
@@ -876,7 +876,7 @@ static const char *dmenucmd[] = {
 	#endif // BAR_DMENUMATCHTOP_PATCH
 	NULL
 };
-static const char *termcmd[]  = { "alacritty", NULL };
+static const char *termcmd[]  = { "~/.bin/terminal", NULL };
 
 #if BAR_STATUSCMD_PATCH
 #if BAR_DWMBLOCKS_PATCH
