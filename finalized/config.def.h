@@ -99,7 +99,7 @@ static char *colors[][ColCount] = {
 
 
 static const char *const autostart[] = {
-	"bash ~/.bin/terminal", NULL,
+	"alacritty", NULL,
 	//"google-chrome-stable", NULL,
     NULL, /* terminate */
 };
@@ -258,7 +258,7 @@ static const char *dmenucmd[] = {
 	"-sf", selfgcolor,
 	NULL
 };
-static const char *termcmd[]  = { "~/.bin/terminal", NULL };
+static const char *termcmd[]  = { "alacritty", NULL };
 
 
 
