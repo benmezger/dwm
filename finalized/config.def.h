@@ -228,7 +228,6 @@ static const Layout layouts[] = {
 	{ "><>",      NULL },    /* no layout function means floating behavior */
 	{ "[M]",      monocle },
 	{ "|M|",      centeredmaster },
-	{ NULL,       NULL },
 };
 
 
@@ -267,7 +266,6 @@ static const Key keys[] = {
 	{ MODKEY|MODKEY1,               XK_p,          spawn,                  {.v = dmenucmd } },
 	{ MODKEY,                       XK_Return,     spawn,                  {.v = termcmd } },
 	{ MODKEY,                       XK_b,          togglebar,              {0} },
-	{ MODKEY|MODKEY1,               XK_b,          togglebar,              {0} },
 	{ MODKEY|ControlMask,           XK_space,      focusmaster,            {0} },
 	{ MODKEY|MODKEY1,               XK_j,          focusstack,              {.i = +1 } },
 	{ MODKEY|MODKEY1,               XK_k,          focusstack,              {.i = -1 } },
